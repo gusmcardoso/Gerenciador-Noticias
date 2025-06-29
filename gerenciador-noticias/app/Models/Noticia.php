@@ -10,17 +10,20 @@ class Noticia extends Model
 {
     use HasFactory;
 
+    // Atualize o $fillable
     protected $fillable = [
         'titulo',
         'conteudo',
         'user_id',
+        'category_id', // Adicione
+        'image',       // Adicione
     ];
 
-    /**
-     * Define a relação de pertencimento a um usuário.
-     */
-    public function user()
+    public function user() { /* ... */ }
+
+    // Adicione o relacionamento com Categoria
+    public function category()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Category::class);
     }
 }

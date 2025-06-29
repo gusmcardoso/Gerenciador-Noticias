@@ -1,18 +1,19 @@
-@extends('layouts.app', ['page' => __('Nova Notícia'), 'pageSlug' => 'noticias-create'])
 @extends('layouts.app', ['page' => __('Nova Notícia'), 'pageSlug' => 'noticias'])
+
 @section('content')
 <div class="row">
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h5 class="title">Criar Nova Notícia</h5>
+                <h5 class="title">{{ __('Criar Nova Notícia') }}</h5>
             </div>
-            <div class="card-body">
-                <form method="post" action="{{ route('noticias.store') }}">
+            <!-- Adicione o enctype aqui -->
+            <form method="post" action="{{ route('noticias.store') }}" autocomplete="off" enctype="multipart/form-data">
+                <div class="card-body">
                     @csrf
                     @include('noticias.partials.form')
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -3,20 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Noticia;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class NoticiaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        $query = Noticia::where('user_id', Auth::id());
+        $query = Noticia::where('user_id', Auth::id())->with('category');
 
-        // Implementação da Pesquisa
-        if ($request->has('search') && $request->search != '') {
+        if ($request->filled('search')) {
             $query->where('titulo', 'like', '%' . $request->search . '%');
         }
 
@@ -25,75 +23,85 @@ class NoticiaController extends Controller
         return view('noticias.index', compact('noticias'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        return view('noticias.create');
+        $categories = Category::all();
+        return view('noticias.create', compact('categories'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
             'titulo' => 'required|string|max:255',
             'conteudo' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        $request->merge(['user_id' => Auth::id()]);
-        Noticia::create($request->all());
+        $data = $request->except('image');
+        $data['user_id'] = Auth::id();
 
-        return redirect()->route('noticias.index')->with('success', 'Notícia criada com sucesso.');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Noticia $noticia)
-    {
-        // Garante que o usuário só pode editar sua própria notícia
-        if ($noticia->user_id !== Auth::id()) {
-            abort(403, 'Acesso não autorizado.');
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('noticias', 'public');
+            $data['image'] = $path;
         }
 
-        return view('noticias.edit', compact('noticia'));
+        Noticia::create($data);
+
+        return redirect()->route('noticias.index')->with('success', 'Notícia criada com sucesso!');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    public function edit(Noticia $noticia)
+    {
+        if ($noticia->user_id !== Auth::id()) {
+            abort(403, 'ACESSO NEGADO');
+        }
+        $categories = Category::all();
+        return view('noticias.edit', compact('noticia', 'categories'));
+    }
+
     public function update(Request $request, Noticia $noticia)
     {
-        // Garante que o usuário só pode atualizar sua própria notícia
         if ($noticia->user_id !== Auth::id()) {
-            abort(403, 'Acesso não autorizado.');
+            abort(403, 'ACESSO NEGADO');
         }
 
         $request->validate([
             'titulo' => 'required|string|max:255',
             'conteudo' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        $noticia->update($request->all());
+        $data = $request->except('image');
 
-        return redirect()->route('noticias.index')->with('success', 'Notícia atualizada com sucesso.');
+        if ($request->hasFile('image')) {
+            // Apaga a imagem antiga se existir
+            if ($noticia->image && Storage::disk('public')->exists($noticia->image)) {
+                Storage::disk('public')->delete($noticia->image);
+            }
+            $path = $request->file('image')->store('noticias', 'public');
+            $data['image'] = $path;
+        }
+
+        $noticia->update($data);
+
+        return redirect()->route('noticias.index')->with('success', 'Notícia atualizada com sucesso!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Noticia $noticia)
     {
-        // Garante que o usuário só pode deletar sua própria notícia
         if ($noticia->user_id !== Auth::id()) {
-            abort(403, 'Acesso não autorizado.');
+            abort(403, 'ACESSO NEGADO');
+        }
+
+        if ($noticia->image && Storage::disk('public')->exists($noticia->image)) {
+            Storage::disk('public')->delete($noticia->image);
         }
 
         $noticia->delete();
 
-        return redirect()->route('noticias.index')->with('success', 'Notícia excluída com sucesso.');
+        return redirect()->route('noticias.index')->with('success', 'Notícia excluída com sucesso!');
     }
 }
+
