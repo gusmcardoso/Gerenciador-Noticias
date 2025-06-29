@@ -1,5 +1,5 @@
 @extends('layouts.app', ['page' => __('Nova Notícia'), 'pageSlug' => 'noticias-create'])
-
+@extends('layouts.app', ['page' => __('Nova Notícia'), 'pageSlug' => 'noticias'])
 @section('content')
 <div class="row">
     <div class="col-md-8">
