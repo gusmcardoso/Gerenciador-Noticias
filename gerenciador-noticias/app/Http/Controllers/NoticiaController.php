@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/NoticiaController.php
 namespace App\Http\Controllers;
 
 use App\Models\Noticia;
@@ -12,15 +11,31 @@ class NoticiaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Noticia::where('user_id', Auth::id())->with('category');
+        $query = Noticia::where('user_id', Auth::id())->with('categories');
 
         if ($request->filled('search')) {
             $query->where('titulo', 'like', '%' . $request->search . '%');
         }
 
-        $noticias = $query->latest()->paginate(10);
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
 
-        return view('noticias.index', compact('noticias'));
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // ATUALIZADO: Adiciona filtro para múltiplas categorias
+        if ($request->filled('category_ids')) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->whereIn('categories.id', $request->category_ids);
+            });
+        }
+
+        $noticias = $query->latest()->paginate(5);
+        $categories = Category::all(); // Pega todas as categorias para o dropdown
+
+        return view('noticias.index', compact('noticias', 'categories'));
     }
 
     public function create()
@@ -34,11 +49,12 @@ class NoticiaController extends Controller
         $request->validate([
             'titulo' => 'required|string|max:255',
             'conteudo' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
+            'categories' => 'required|array',
+            'categories.*' => 'exists:categories,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        $data = $request->except('image');
+        $data = $request->except(['image', 'categories']);
         $data['user_id'] = Auth::id();
 
         if ($request->hasFile('image')) {
@@ -46,24 +62,22 @@ class NoticiaController extends Controller
             $data['image'] = $path;
         }
 
-        Noticia::create($data);
+        $noticia = Noticia::create($data);
+        $noticia->categories()->attach($request->categories);
 
         return redirect()->route('noticias.index')->with('success', 'Notícia criada com sucesso!');
     }
-public function show(Noticia $noticia)
+
+    public function show(Noticia $noticia)
     {
-        // Regra de segurança: Garante que o usuário só pode ver sua própria notícia.
         if ($noticia->user_id !== Auth::id()) {
             abort(403, 'ACESSO NEGADO');
         }
-
         return view('noticias.show', compact('noticia'));
     }
 
     public function edit(Noticia $noticia)
     {
-        // Regra de segurança: Garante que o usuário só pode editar sua própria notícia.
-        // Se o usuário não for o dono da notícia, retorna um erro 403.
         if ($noticia->user_id !== Auth::id()) {
             abort(403, 'ACESSO NEGADO');
         }
@@ -80,14 +94,14 @@ public function show(Noticia $noticia)
         $request->validate([
             'titulo' => 'required|string|max:255',
             'conteudo' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
+            'categories' => 'required|array',
+            'categories.*' => 'exists:categories,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        $data = $request->except('image');
+        $data = $request->except(['image', 'categories']);
 
         if ($request->hasFile('image')) {
-            // Apaga a imagem antiga se existir
             if ($noticia->image && Storage::disk('public')->exists($noticia->image)) {
                 Storage::disk('public')->delete($noticia->image);
             }
@@ -96,6 +110,7 @@ public function show(Noticia $noticia)
         }
 
         $noticia->update($data);
+        $noticia->categories()->sync($request->categories);
 
         return redirect()->route('noticias.index')->with('success', 'Notícia atualizada com sucesso!');
     }
@@ -115,4 +130,3 @@ public function show(Noticia $noticia)
         return redirect()->route('noticias.index')->with('success', 'Notícia excluída com sucesso!');
     }
 }
-

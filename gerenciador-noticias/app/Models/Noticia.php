@@ -1,6 +1,4 @@
 <?php
-
-// app/Models/Noticia.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,20 +8,26 @@ class Noticia extends Model
 {
     use HasFactory;
 
-    // Atualize o $fillable
     protected $fillable = [
         'titulo',
         'conteudo',
         'user_id',
-        'category_id', // Adicione
-        'image',       // Adicione
+        'image',
     ];
 
-    public function user() { /* ... */ }
-
-    // Adicione o relacionamento com Categoria
-    public function category()
+    /**
+     * Define o relacionamento com o usuário (Autor).
+     */
+    public function user()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Define o relacionamento de muitos-para-muitos com a Categoria.
+     */
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class);
     }
 }

@@ -31,7 +31,8 @@
     <script src="https://cdn.tiny.cloud/1/mmu7v0fpufrlduq41mn2eozzlmbo24g1mmcvzk5zhmq3mh5w/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 <link href="{{ asset('white') }}/css/white-dashboard.css?v=1.0.0" rel="stylesheet" />
     <link href="{{ asset('white') }}/css/theme.css" rel="stylesheet" />
-
+   <!-- Adicione o CSS do Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <!-- REMOVA a linha da CDN -->
      <script src="https://cdn.tiny.cloud/1/mmu7v0fpufrlduq41mn2eozzlmbo24g1mmcvzk5zhmq3mh5w/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 
@@ -138,6 +139,8 @@
 
         <script src="{{ asset('white') }}/js/white-dashboard.min.js?v=1.0.0"></script>
         <script src="{{ asset('white') }}/js/theme.js"></script>
+<!-- Adicione o JS do Select2 -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
         @stack('js')
 

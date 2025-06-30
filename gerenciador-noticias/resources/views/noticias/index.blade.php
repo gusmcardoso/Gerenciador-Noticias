@@ -17,22 +17,54 @@
             <div class="card-body">
                 @include('alerts.success')
 
-                <form action="{{ route('noticias.index') }}" method="GET" class="mb-3">
-                    <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Pesquisar por título..." value="{{ request('search') }}">
-                        <div class="input-group-append">
-                            <button class="btn btn-primary" type="submit"><i class="tim-icons icon-zoom-split"></i></button>
+                <form action="{{ route('noticias.index') }}" method="GET" class="mb-4">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="search">Pesquisar por Título</label>
+                                <input type="text" id="search" name="search" class="form-control" placeholder="Digite o título..." value="{{ request('search') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="category_ids">Filtrar por Categorias</label>
+                                <select id="category_ids" name="category_ids[]" class="form-control select2-filter" multiple="multiple">
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}"
+                                            {{ (is_array(request('category_ids')) && in_array($category->id, request('category_ids'))) ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="date_from">Data Inicial</label>
+                                <input type="date" id="date_from" name="date_from" class="form-control" value="{{ request('date_from') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="date_to">Data Final</label>
+                                <input type="date" id="date_to" name="date_to" class="form-control" value="{{ request('date_to') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <div class="form-group w-100">
+                               <button class="btn btn-primary btn-block" type="submit">Filtrar</button>
+                            </div>
                         </div>
                     </div>
                 </form>
 
-                <div class="table-responsive">
+                <div class="table-responsive" style="overflow-x: auto; overflow-y: visible;">
                     <table class="table tablesorter">
                         <thead class="text-primary">
                             <tr>
                                 <th style="width: 10%;">Imagem</th>
                                 <th>Título</th>
-                                <th>Categoria</th>
+                                <th>Categorias</th>
                                 <th>Data de Criação</th>
                                 <th class="text-center">Ações</th>
                             </tr>
@@ -50,23 +82,34 @@
                                     @endif
                                 </td>
                                 <td>{{ $noticia->titulo }}</td>
-                                <td>{{ $noticia->category->name ?? 'Sem categoria' }}</td>
+                                <td>
+                                    @forelse($noticia->categories as $category)
+                                        <span class="badge badge-primary">{{ $category->name }}</span>
+                                    @empty
+                                        <span class="badge badge-secondary">Sem categoria</span>
+                                    @endforelse
+                                </td>
                                 <td>{{ $noticia->created_at->format('d/m/Y H:i') }}</td>
                                 <td class="text-center">
-                                    <form action="{{ route('noticias.destroy', $noticia) }}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir esta notícia?');" style="display: inline-block;">
-                                        @csrf
-                                        @method('delete')
-                                        <!-- BOTÃO VISUALIZAR (NOVO) -->
-                                        <a href="{{ route('noticias.show', $noticia) }}" class="btn btn-info btn-sm btn-icon" title="Visualizar">
-                                            <i class="tim-icons icon-zoom-split"></i>
-                                        </a>
-                                        <!-- FIM DO BOTÃO -->
-                                        <a href="{{ route('noticias.edit', $noticia) }}" class="btn btn-warning btn-sm btn-icon" title="Editar">
-                                            <i class="tim-icons icon-pencil"></i>
-                                        </a>
-                                        <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Excluir">
-                                            <i class="tim-icons icon-simple-remove"></i>
+                                    <div class="dropdown">
+                                        <button type="button" class="btn btn-link dropdown-toggle btn-icon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="tim-icons icon-settings-gear-63"></i>
                                         </button>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <a class="dropdown-item" href="{{ route('noticias.show', $noticia) }}">
+                                                <i class="tim-icons icon-zoom-split"></i> Visualizar
+                                            </a>
+                                            <a class="dropdown-item" href="{{ route('noticias.edit', $noticia) }}">
+                                                <i class="tim-icons icon-pencil"></i> Editar
+                                            </a>
+                                            <a class="dropdown-item text-danger" href="#" onclick="event.preventDefault(); if(confirm('Tem certeza que deseja excluir esta notícia?')) { document.getElementById('delete-form-{{ $noticia->id }}').submit(); }">
+                                                <i class="tim-icons icon-simple-remove"></i> Excluir
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <form id="delete-form-{{ $noticia->id }}" action="{{ route('noticias.destroy', $noticia) }}" method="POST" style="display: none;">
+                                        @csrf
+                                        @method('DELETE')
                                     </form>
                                 </td>
                             </tr>
@@ -88,3 +131,16 @@
     </div>
 </div>
 @endsection
+
+@push('js')
+<script>
+    $(document).ready(function() {
+        // Inicializa o Select2 para o filtro de categorias
+        $('.select2-filter').select2({
+            theme: "classic",
+            placeholder: "Filtrar por categorias",
+            allowClear: true
+        });
+    });
+</script>
+@endpush

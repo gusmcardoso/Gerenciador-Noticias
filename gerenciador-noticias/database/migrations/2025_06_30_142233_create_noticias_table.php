@@ -15,12 +15,14 @@ return new class extends Migration
 {
     Schema::create('noticias', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Chave estrangeira para o usuário
+        $table->foreignId('user_id')->constrained()->onDelete('cascade');
         $table->string('titulo');
         $table->text('conteudo');
+        $table->string('image')->nullable();
         $table->timestamps();
     });
 }
+
 
     /**
      * Reverse the migrations.
