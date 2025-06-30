@@ -50,9 +50,20 @@ class NoticiaController extends Controller
 
         return redirect()->route('noticias.index')->with('success', 'Notícia criada com sucesso!');
     }
+public function show(Noticia $noticia)
+    {
+        // Regra de segurança: Garante que o usuário só pode ver sua própria notícia.
+        if ($noticia->user_id !== Auth::id()) {
+            abort(403, 'ACESSO NEGADO');
+        }
+
+        return view('noticias.show', compact('noticia'));
+    }
 
     public function edit(Noticia $noticia)
     {
+        // Regra de segurança: Garante que o usuário só pode editar sua própria notícia.
+        // Se o usuário não for o dono da notícia, retorna um erro 403.
         if ($noticia->user_id !== Auth::id()) {
             abort(403, 'ACESSO NEGADO');
         }

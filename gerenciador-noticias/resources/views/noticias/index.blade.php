@@ -56,8 +56,17 @@
                                     <form action="{{ route('noticias.destroy', $noticia) }}" method="post" onsubmit="return confirm('Tem certeza que deseja excluir esta notícia?');" style="display: inline-block;">
                                         @csrf
                                         @method('delete')
-                                        <a href="{{ route('noticias.edit', $noticia) }}" class="btn btn-warning btn-sm btn-icon"><i class="tim-icons icon-pencil"></i></a>
-                                        <button type="submit" class="btn btn-danger btn-sm btn-icon"><i class="tim-icons icon-simple-remove"></i></button>
+                                        <!-- BOTÃO VISUALIZAR (NOVO) -->
+                                        <a href="{{ route('noticias.show', $noticia) }}" class="btn btn-info btn-sm btn-icon" title="Visualizar">
+                                            <i class="tim-icons icon-zoom-split"></i>
+                                        </a>
+                                        <!-- FIM DO BOTÃO -->
+                                        <a href="{{ route('noticias.edit', $noticia) }}" class="btn btn-warning btn-sm btn-icon" title="Editar">
+                                            <i class="tim-icons icon-pencil"></i>
+                                        </a>
+                                        <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Excluir">
+                                            <i class="tim-icons icon-simple-remove"></i>
+                                        </button>
                                     </form>
                                 </td>
                             </tr>
