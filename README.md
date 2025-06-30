@@ -62,7 +62,7 @@ Passos:
 
 Clone o repositório:
 
-git clone https://github.com/seu-usuario/nome-do-repositorio.git
+git clone https://github.com/gusmcardoso/Gerenciador-Noticias.git
 cd nome-do-repositorio
 
 Instale as dependências do PHP:
