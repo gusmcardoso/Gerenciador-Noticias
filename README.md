@@ -112,9 +112,11 @@ php artisan serve
 
 A aplicação estará disponível em http://127.0.0.1:8000.
 
+Publicação online em breve.
+
 👨‍💻 Autor
-[Seu Nome Completo]
+[Gustavo Martins Cardoso]
 
-E-mail: [seu.email@exemplo.com]
+E-mail: [gmcardoso.2003@gmail.com]
 
-LinkedIn: [https://linkedin.com/in/seu-perfil]
+LinkedIn: [https://www.linkedin.com/in/gustavomartinsc/]
